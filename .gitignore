@@ -1,0 +1,21 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment (VERY IMPORTANT)
+venv/
+
+# Environment variables (secrets)
+.env
+
+# Database files (if local)
+*.db
+*.sqlite3
+
+# OS junk
+.DS_Store
+Thumb
