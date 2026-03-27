@@ -4,6 +4,8 @@ from fastapi import HTTPException
 from app.database.connection import get_connection
 from app.models.user import LoginAccount
 
+# MAIN AUTH TABLE
+
 def create_table_users():
     conn = get_connection()
     cursor = conn.cursor()
@@ -29,7 +31,7 @@ def create_table_passwords():
                        id UUID PRIMARY KEY,
                        user_id UUID REFERENCES users(id),
                        site TEXT,
-                       email TEXT,
+                       email TEXT UNIQUE,
                        hashed_password TEXT,
                        date_entry TEXT
                    )
@@ -73,3 +75,35 @@ def account_check(email:str):
                    """,(email,))
     user = cursor.fetchone()
     return user
+
+
+# MAIN PASSWORD MANAGER
+
+
+def password_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS passwords(
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   user_id TEXT NOT NULL,
+                   site_link TEXT NOT NULL,
+                   username TEXT,
+                   email TEXT,
+                   encrypted_password TEXT NOT NULL,
+                   created_at TEXT
+                   )
+                   """)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def insert_data(user_id,site_link,username,email,password):
+    conn=get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   INSERT * INTO passwords(user_id,site_link,username,email,password)
+                   """,user_id,site_link,username,email,password)
+    conn.commit()
+    cursor.close()
+    conn.close()

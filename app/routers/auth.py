@@ -25,7 +25,7 @@ def register(user:RegisterAccount):
     return {"message": "Account created"}
 
 @router.post("/login")
-def login(user:LoginAccount,response:Response):
+def login(user:LoginAccount,response:Response,):
 # Gets row where user entered email
     db_user = account_check(user.email)
 # Doesn't exist then raise error

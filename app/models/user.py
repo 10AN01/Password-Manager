@@ -6,3 +6,10 @@ class RegisterAccount(BaseModel):
 class LoginAccount(BaseModel):
     email:str
     password:str
+
+class InsertPassword(BaseModel):
+    site_link:str
+    username:str
+    email:str
+    password:str
+    
