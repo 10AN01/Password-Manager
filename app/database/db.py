@@ -3,7 +3,6 @@ import os
 from fastapi import HTTPException
 from app.database.connection import get_connection
 from app.models.user import LoginAccount
-
 # MAIN AUTH TABLE
 
 def create_table_users():
@@ -94,6 +93,7 @@ def password_db():
                    created_at TEXT
                    )
                    """)
+    print("Created Table")
     conn.commit()
     cursor.close()
     conn.close()
@@ -107,3 +107,12 @@ def insert_data(user_id,site_link,username,email,password):
     conn.commit()
     cursor.close()
     conn.close()
+
+def account_check(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   SELECT * FROM users WHERE id = %s
+                   """,(user_id,))
+    user = cursor.fetchone()
+    return user
