@@ -1,0 +1,1275 @@
+<!-- ══════════════════════════════════
+     EVERYTHING AI IN INDEX.HTML
+══════════════════════════════════ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaultify — Password Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0c10;
+      --surface:   #111318;
+      --surface2:  #1a1d24;
+      --border:    #252830;
+      --border2:   #2e3240;
+      --accent:    #4f8ef7;
+      --accent2:   #7b5cf0;
+      --green:     #34d399;
+      --red:       #f87171;
+      --yellow:    #fbbf24;
+      --text:      #e8eaf0;
+      --muted:     #636878;
+      --muted2:    #8a8fa8;
+      --radius:    14px;
+      --radius-sm: 8px;
+      --shadow:    0 4px 32px rgba(0,0,0,.45);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .6;
+    }
+
+    .glow-orb { position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0; }
+    .glow-orb.one   { width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(79,142,247,.12) 0%,transparent 70%); }
+    .glow-orb.two   { width:500px;height:500px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(123,92,240,.10) 0%,transparent 70%); }
+    .glow-orb.three { width:300px;height:300px;top:40%;left:60%;background:radial-gradient(circle,rgba(52,211,153,.06) 0%,transparent 70%); }
+
+    .page { position:relative;z-index:1;min-height:100vh; }
+
+    /* ── AUTH ── */
+    #auth-page { display:flex;align-items:center;justify-content:center;padding:24px; }
+    .auth-shell { width:100%;max-width:420px; }
+
+    .logo { display:flex;align-items:center;gap:10px;margin-bottom:40px;justify-content:center; }
+    .logo-icon {
+      width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border-radius:10px;display:flex;align-items:center;justify-content:center;
+      font-size:18px;box-shadow:0 0 24px rgba(79,142,247,.4);
+    }
+    .logo-text {
+      font-size:22px;font-weight:700;letter-spacing:-.5px;
+      background:linear-gradient(90deg,#e8eaf0,#8a8fa8);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+
+    .auth-card {
+      background:var(--surface);border:1px solid var(--border);border-radius:20px;
+      padding:36px;box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.03);
+      position:relative;overflow:hidden;
+    }
+    .auth-card::before {
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+    }
+
+    .tab-bar {
+      display:grid;grid-template-columns:1fr 1fr;
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:4px;margin-bottom:28px;
+    }
+    .tab-btn {
+      background:none;border:none;color:var(--muted2);font-family:'Sora',sans-serif;
+      font-size:13.5px;font-weight:500;padding:8px 0;border-radius:6px;
+      cursor:pointer;transition:all var(--transition);
+    }
+    .tab-btn.active { background:var(--border2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3); }
+    .tab-btn:hover:not(.active) { color:var(--text); }
+
+    .form-title { font-size:20px;font-weight:600;margin-bottom:4px;letter-spacing:-.3px; }
+    .form-subtitle { font-size:13px;color:var(--muted2);margin-bottom:24px; }
+    .form-panel.hidden { display:none; }
+
+    .field { margin-bottom:16px; }
+    .field label {
+      display:block;font-size:12.5px;font-weight:500;color:var(--muted2);
+      margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase;
+    }
+    .field-wrap { position:relative; }
+    .field-icon {
+      position:absolute;left:14px;top:50%;transform:translateY(-50%);
+      color:var(--muted);font-size:15px;pointer-events:none;
+    }
+    .field input {
+      width:100%;background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:11px 14px 11px 40px;
+      color:var(--text);font-family:'Sora',sans-serif;font-size:14px;outline:none;
+      transition:border-color var(--transition),box-shadow var(--transition),background var(--transition);
+    }
+    .field input:focus {
+      border-color:var(--accent);background:rgba(79,142,247,.05);
+      box-shadow:0 0 0 3px rgba(79,142,247,.12);
+    }
+    .field input::placeholder { color:var(--muted); }
+
+    .pw-toggle {
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      background:none;border:none;color:var(--muted);cursor:pointer;
+      padding:2px;font-size:15px;transition:color var(--transition);
+    }
+    .pw-toggle:hover { color:var(--muted2); }
+
+    .strength-bar-wrap { margin-top:8px;display:flex;gap:4px; }
+    .strength-seg { height:3px;flex:1;border-radius:99px;background:var(--border);transition:background .3s ease; }
+    .strength-label { font-size:11px;color:var(--muted);margin-top:4px; }
+
+    .btn-primary {
+      width:100%;background:linear-gradient(135deg,var(--accent),#3a7de8);
+      border:none;border-radius:var(--radius-sm);color:#fff;
+      font-family:'Sora',sans-serif;font-size:14.5px;font-weight:600;
+      padding:12px;cursor:pointer;margin-top:4px;letter-spacing:.2px;
+      transition:opacity var(--transition),transform var(--transition),box-shadow var(--transition);
+      position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(79,142,247,.3);
+    }
+    .btn-primary::after {
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);pointer-events:none;
+    }
+    .btn-primary:hover:not(:disabled) { opacity:.9;transform:translateY(-1px);box-shadow:0 6px 22px rgba(79,142,247,.4); }
+    .btn-primary:active:not(:disabled) { transform:translateY(0); }
+    .btn-primary:disabled { opacity:.5;cursor:not-allowed; }
+
+    .spinner {
+      display:inline-block;width:14px;height:14px;
+      border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:spin .6s linear infinite;
+      vertical-align:middle;margin-right:6px;
+    }
+    /* small dark spinner for inline use */
+    .spinner-sm {
+      display:inline-block;width:11px;height:11px;
+      border:2px solid var(--border2);border-top-color:var(--muted2);
+      border-radius:50%;animation:spin .6s linear infinite;
+      vertical-align:middle;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .message {
+      margin-top:14px;padding:11px 14px;border-radius:var(--radius-sm);
+      font-size:13px;font-weight:500;display:none;align-items:center;gap:8px;
+      animation:fadeIn .2s ease;
+    }
+    .message.show { display:flex; }
+    .message.error   { background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#fca5a5; }
+    .message.success { background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#6ee7b7; }
+
+    @keyframes fadeIn  { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── DASHBOARD ── */
+    #dashboard-page { display:none; }
+    #dashboard-page.visible { display:block;animation:fadeIn .35s ease; }
+
+    .nav {
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 28px;height:64px;
+      background:rgba(17,19,24,.85);backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+    }
+    .nav-left  { display:flex;align-items:center;gap:12px; }
+    .nav-right { display:flex;align-items:center;gap:10px; }
+    .nav-logo-icon {
+      width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;
+    }
+    .nav-logo-text { font-size:17px;font-weight:700;letter-spacing:-.4px; }
+    .user-chip {
+      display:flex;align-items:center;gap:8px;background:var(--surface2);
+      border:1px solid var(--border);border-radius:99px;padding:5px 12px 5px 6px;
+      font-size:13px;color:var(--muted2);
+    }
+    .user-avatar {
+      width:26px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:700;color:#fff;
+    }
+    .btn-logout {
+      background:var(--surface2);border:1px solid var(--border);color:var(--muted2);
+      font-family:'Sora',sans-serif;font-size:13px;font-weight:500;
+      padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;
+      transition:all var(--transition);display:flex;align-items:center;gap:6px;
+    }
+    .btn-logout:hover { background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);color:#fca5a5; }
+
+    .dash-content { max-width:900px;margin:0 auto;padding:40px 24px; }
+
+    .welcome-banner {
+      background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(123,92,240,.08));
+      border:1px solid rgba(79,142,247,.2);border-radius:18px;
+      padding:28px 32px;margin-bottom:32px;position:relative;overflow:hidden;
+    }
+    .welcome-banner::after {
+      content:'🔐';position:absolute;right:28px;top:50%;transform:translateY(-50%);
+      font-size:52px;opacity:.2;
+    }
+    .welcome-banner h2 { font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.4px; }
+    .welcome-banner p  { font-size:13.5px;color:var(--muted2); }
+
+    .stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px; }
+    .stat-card {
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:20px;transition:border-color var(--transition),transform var(--transition);
+    }
+    .stat-card:hover { border-color:var(--border2);transform:translateY(-2px); }
+    .stat-icon  { font-size:22px;margin-bottom:10px; }
+    .stat-value { font-size:28px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-1px;margin-bottom:2px; }
+    .stat-label { font-size:12px;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px; }
+    .stat-badge {
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(52,211,153,.1);color:var(--green);
+      border-radius:99px;font-size:11px;padding:2px 8px;margin-top:6px;
+    }
+
+    .section-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+    .section-title { font-size:16px;font-weight:600;letter-spacing:-.2px; }
+    .btn-add {
+      display:flex;align-items:center;gap:6px;
+      background:linear-gradient(135deg,var(--accent),#3a7de8);
+      border:none;border-radius:var(--radius-sm);color:#fff;
+      font-family:'Sora',sans-serif;font-size:13px;font-weight:600;
+      padding:8px 16px;cursor:pointer;
+      transition:all var(--transition);box-shadow:0 2px 12px rgba(79,142,247,.25);
+    }
+    .btn-add:hover { opacity:.88;transform:translateY(-1px); }
+
+    .search-wrap { position:relative;margin-bottom:20px; }
+    .search-wrap input {
+      width:100%;background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:10px 14px 10px 40px;
+      color:var(--text);font-family:'Sora',sans-serif;font-size:13.5px;outline:none;
+      transition:border-color var(--transition),box-shadow var(--transition);
+    }
+    .search-wrap input:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.1); }
+    .search-wrap input::placeholder { color:var(--muted); }
+    .search-icon { position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px; }
+
+    /* ── Password cards ── */
+    .pw-list { display:flex;flex-direction:column;gap:10px; }
+
+    .pw-card {
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:0;display:grid;
+      grid-template-columns: 56px 1fr auto auto;
+      align-items:center;
+      transition:all var(--transition);animation:slideUp .22s ease;
+      overflow:hidden;
+    }
+    .pw-card:hover { border-color:var(--border2);background:var(--surface2); }
+
+    .pw-favicon {
+      width:56px;height:64px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);
+      text-transform:uppercase;border-right:1px solid var(--border);
+      background:var(--surface2);flex-shrink:0;letter-spacing:.5px;
+    }
+
+    .pw-info { padding:14px 16px;min-width:0; }
+    .pw-site {
+      font-size:14px;font-weight:600;margin-bottom:3px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);
+    }
+    .pw-site a { color:inherit;text-decoration:none; }
+    .pw-site a:hover { color:var(--accent); }
+
+    .pw-badges { display:flex;gap:6px;flex-wrap:wrap;align-items:center; }
+    .pw-badge {
+      display:inline-flex;align-items:center;gap:4px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:6px;font-size:11.5px;color:var(--muted2);
+      padding:2px 8px;font-family:'DM Mono',monospace;
+      max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .pw-badge-icon { font-size:10px;flex-shrink:0; }
+
+    .pw-tag-wrap { padding:0 8px;flex-shrink:0; }
+    .pw-tag {
+      font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:99px;
+      text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;
+    }
+    .pw-tag.strong { background:rgba(52,211,153,.12);color:var(--green); }
+    .pw-tag.medium { background:rgba(251,191,36,.12);color:var(--yellow); }
+    .pw-tag.weak   { background:rgba(248,113,113,.12);color:var(--red); }
+
+    .pw-actions {
+      display:flex;flex-direction:column;gap:0;
+      border-left:1px solid var(--border);align-self:stretch;
+    }
+    .pw-btn {
+      background:none;border:none;border-bottom:1px solid var(--border);
+      color:var(--muted2);font-size:11.5px;padding:0 14px;cursor:pointer;
+      transition:all var(--transition);font-family:'Sora',sans-serif;font-weight:500;
+      flex:1;white-space:nowrap;
+    }
+    .pw-btn:last-child { border-bottom:none; }
+    .pw-btn:hover { background:var(--border);color:var(--text); }
+    .pw-btn.danger:hover { background:rgba(248,113,113,.1);color:var(--red); }
+
+    /* Expanded detail row */
+    .pw-detail {
+      grid-column:1/-1;
+      background:var(--surface2);
+      border-top:1px solid var(--border);
+      padding:14px 16px 14px 72px;
+      display:none;
+      gap:20px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+    .pw-card.expanded .pw-detail { display:flex; }
+    .pw-detail-field { display:flex;flex-direction:column;gap:4px;min-width:160px; }
+    .pw-detail-label {
+      font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;
+    }
+    .pw-detail-value {
+      font-family:'DM Mono',monospace;font-size:12.5px;color:var(--muted2);
+      display:flex;align-items:center;gap:8px;
+    }
+    .pw-detail-value .copy-btn {
+      background:var(--border);border:none;border-radius:4px;color:var(--muted2);
+      font-size:10px;padding:2px 6px;cursor:pointer;transition:all var(--transition);
+      font-family:'Sora',sans-serif;flex-shrink:0;
+    }
+    .pw-detail-value .copy-btn:hover { background:var(--border2);color:var(--text); }
+    .pw-detail-value .copy-btn:disabled { opacity:.4;cursor:not-allowed; }
+
+    /* Password reveal field */
+    .pw-reveal-wrap {
+      display:flex;align-items:center;gap:8px;
+      background:var(--surface);border:1px solid var(--border);border-radius:6px;
+      padding:5px 10px;min-width:200px;
+    }
+    .pw-dots { font-size:18px;letter-spacing:3px;color:var(--muted);flex:1;line-height:1; }
+    .pw-plain {
+      font-family:'DM Mono',monospace;font-size:12px;color:var(--text);
+      flex:1;word-break:break-all;display:none;
+    }
+    .pw-reveal-btn {
+      background:none;border:none;cursor:pointer;font-size:14px;
+      padding:0 2px;line-height:1;flex-shrink:0;
+      transition:opacity var(--transition);opacity:.6;
+    }
+    .pw-reveal-btn:hover { opacity:1; }
+    .pw-reveal-btn:disabled { opacity:.3;cursor:not-allowed; }
+
+    /* Skeleton */
+    .skeleton {
+      background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+      background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;
+    }
+    @keyframes shimmer { from{background-position:200% 0} to{background-position:-200% 0} }
+    .skeleton-card {
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:16px 20px;display:flex;align-items:center;gap:14px;height:68px;
+    }
+
+    /* Empty state */
+    .empty-state { text-align:center;padding:60px 20px;color:var(--muted2); }
+    .empty-state .empty-icon { font-size:48px;margin-bottom:14px;opacity:.4; }
+    .empty-state h3 { font-size:16px;font-weight:600;color:var(--muted2);margin-bottom:6px; }
+    .empty-state p  { font-size:13px; }
+    .btn-add-empty {
+      display:inline-flex;align-items:center;gap:8px;margin-top:20px;
+      background:linear-gradient(135deg,var(--accent),#3a7de8);
+      border:none;border-radius:var(--radius-sm);color:#fff;
+      font-family:'Sora',sans-serif;font-size:13.5px;font-weight:600;
+      padding:10px 22px;cursor:pointer;transition:all var(--transition);
+      box-shadow:0 4px 16px rgba(79,142,247,.3);
+    }
+    .btn-add-empty:hover { opacity:.88;transform:translateY(-1px); }
+
+    /* Error banner */
+    .load-error {
+      background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);
+      border-radius:var(--radius);padding:20px 24px;
+      display:flex;align-items:center;gap:14px;color:#fca5a5;font-size:13.5px;
+    }
+    .load-error-icon { font-size:22px;flex-shrink:0; }
+    .load-error button {
+      margin-left:auto;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.25);
+      color:#fca5a5;font-family:'Sora',sans-serif;font-size:12px;font-weight:500;
+      padding:5px 14px;border-radius:6px;cursor:pointer;transition:all var(--transition);flex-shrink:0;
+    }
+    .load-error button:hover { background:rgba(248,113,113,.25); }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position:fixed;inset:0;background:rgba(0,0,0,.72);
+      backdrop-filter:blur(8px);z-index:200;
+      display:none;align-items:center;justify-content:center;padding:24px;
+    }
+    .modal-backdrop.open { display:flex;animation:fadeIn .15s ease; }
+    .modal {
+      background:var(--surface);border:1px solid var(--border2);
+      border-radius:20px;width:100%;max-width:460px;
+      box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);
+      position:relative;overflow:hidden;
+      animation:slideUp .22s cubic-bezier(.34,1.2,.64,1);
+    }
+    .modal::before {
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);
+    }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;padding:22px 24px 0; }
+    .modal-title { font-size:18px;font-weight:700;letter-spacing:-.3px; }
+    .modal-close {
+      background:var(--surface2);border:1px solid var(--border);color:var(--muted2);
+      width:30px;height:30px;border-radius:8px;display:flex;align-items:center;
+      justify-content:center;cursor:pointer;font-size:16px;transition:all var(--transition);
+    }
+    .modal-close:hover { background:var(--border2);color:var(--text); }
+    .modal-body { padding:20px 24px 12px; }
+    .modal-body .field { margin-bottom:14px; }
+    .modal-body .field input { padding-right:44px; }
+
+    .gen-row { display:flex;gap:8px;align-items:center;margin-top:8px; }
+    .btn-gen {
+      background:var(--surface2);border:1px solid var(--border);color:var(--muted2);
+      font-family:'Sora',sans-serif;font-size:12px;font-weight:500;
+      padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;
+      transition:all var(--transition);flex-shrink:0;
+    }
+    .btn-gen:hover { border-color:var(--accent);color:var(--accent);background:rgba(79,142,247,.06); }
+
+    .modal-footer { display:flex;gap:10px;padding:14px 24px 22px; }
+    .btn-cancel {
+      flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted2);
+      font-family:'Sora',sans-serif;font-size:14px;font-weight:500;
+      padding:11px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);
+    }
+    .btn-cancel:hover { background:var(--border2);color:var(--text); }
+    .btn-save {
+      flex:2;background:linear-gradient(135deg,var(--accent),#3a7de8);
+      border:none;color:#fff;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;
+      padding:11px;border-radius:var(--radius-sm);cursor:pointer;
+      transition:all var(--transition);box-shadow:0 4px 16px rgba(79,142,247,.3);
+      position:relative;overflow:hidden;
+    }
+    .btn-save::after { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);pointer-events:none; }
+    .btn-save:hover:not(:disabled) { opacity:.9;transform:translateY(-1px); }
+    .btn-save:disabled { opacity:.5;cursor:not-allowed; }
+
+    /* Toast */
+    #toast {
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:99px;padding:10px 22px;
+      font-size:13.5px;font-weight:500;white-space:nowrap;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);
+      z-index:300;opacity:0;pointer-events:none;
+      transition:opacity .2s ease,transform .2s ease;
+    }
+    #toast.show { opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto; }
+    #toast.t-success { border-color:rgba(52,211,153,.35);color:var(--green); }
+    #toast.t-error   { border-color:rgba(248,113,113,.35);color:var(--red); }
+
+    @media (max-width:600px) {
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .stat-card:last-child { grid-column:span 2; }
+      .auth-card { padding:24px 20px; }
+      .nav { padding:0 16px; }
+      .nav .user-chip span { display:none; }
+      .dash-content { padding:24px 16px; }
+      .welcome-banner { padding:22px 20px; }
+      .welcome-banner::after { display:none; }
+      .pw-card { grid-template-columns:44px 1fr auto; }
+      .pw-actions { flex-direction:row;border-left:none;border-top:1px solid var(--border);grid-column:1/-1; }
+      .pw-btn { border-bottom:none;border-right:1px solid var(--border);padding:8px 0;flex:1; }
+      .pw-btn:last-child { border-right:none; }
+      .pw-detail { padding-left:16px; }
+      .pw-tag-wrap { display:none; }
+      .pw-reveal-wrap { min-width:unset;width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="glow-orb one"></div>
+<div class="glow-orb two"></div>
+<div class="glow-orb three"></div>
+
+<!-- ══════════════════════════════════
+     AUTH PAGE
+══════════════════════════════════ -->
+<div id="auth-page" class="page">
+  <div class="auth-shell">
+    <div class="logo">
+      <div class="logo-icon">🔐</div>
+      <span class="logo-text">Vaultify</span>
+    </div>
+    <div class="auth-card">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-login"    onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn"        id="tab-register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="form-panel" id="panel-login">
+        <div class="form-title">Welcome back</div>
+        <div class="form-subtitle">Sign in to access your vault</div>
+        <div class="field">
+          <label>Email address</label>
+          <div class="field-wrap">
+            <span class="field-icon">✉</span>
+            <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Master password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" id="login-password" placeholder="••••••••••••" autocomplete="current-password" />
+            <button class="pw-toggle" onclick="togglePw('login-password',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-login" onclick="handleLogin()">Sign In</button>
+        <div class="message" id="login-msg"></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="form-panel hidden" id="panel-register">
+        <div class="form-title">Create account</div>
+        <div class="form-subtitle">Start securing your passwords today</div>
+        <div class="field">
+          <label>Email address</label>
+          <div class="field-wrap">
+            <span class="field-icon">✉</span>
+            <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Master password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" id="reg-password" placeholder="Create a strong password"
+                   autocomplete="new-password" oninput="updateStrength(this.value)" />
+            <button class="pw-toggle" onclick="togglePw('reg-password',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="strength-bar-wrap">
+            <div class="strength-seg" id="seg1"></div>
+            <div class="strength-seg" id="seg2"></div>
+            <div class="strength-seg" id="seg3"></div>
+            <div class="strength-seg" id="seg4"></div>
+          </div>
+          <div class="strength-label" id="strength-label">Enter a password</div>
+        </div>
+        <div class="field">
+          <label>Confirm password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" id="reg-confirm" placeholder="Repeat your password" autocomplete="new-password" />
+            <button class="pw-toggle" onclick="togglePw('reg-confirm',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-register" onclick="handleRegister()">Create Account</button>
+        <div class="message" id="register-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     DASHBOARD
+══════════════════════════════════ -->
+<div id="dashboard-page" class="page">
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo-icon">🔐</div>
+      <span class="nav-logo-text">Vaultify</span>
+    </div>
+    <div class="nav-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <span id="user-email-display">user@example.com</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">⏏ Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dash-content">
+    <div class="welcome-banner">
+      <h2>Your vault is secured 🛡️</h2>
+      <p id="welcome-msg">Welcome back! All your credentials are encrypted.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🔑</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Saved Passwords</div>
+        <div class="stat-badge">✓ Encrypted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">AES</div>
+        <div class="stat-label">Encryption</div>
+        <div class="stat-badge">✓ Secure</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" id="stat-weak">0</div>
+        <div class="stat-label">Weak Passwords</div>
+        <div id="stat-weak-note" style="margin-top:6px;font-size:11px;color:var(--green);">All passwords are strong</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-title">Saved Passwords</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-add" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted2);box-shadow:none;" onclick="loadPasswords()" title="Refresh list">↻ Refresh</button>
+        <button class="btn-add" onclick="openModal()">+ Add Password</button>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input"
+             placeholder="Search by site, username or email…"
+             oninput="filterPasswords(this.value)" />
+    </div>
+
+    <div class="pw-list" id="pw-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ADD PASSWORD MODAL
+══════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="backdropClose(event)">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <span class="modal-title">Add New Password</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Site / App URL <span style="color:var(--red);font-size:11px;">*</span></label>
+        <div class="field-wrap">
+          <span class="field-icon">🌐</span>
+          <input type="url" id="m-site" placeholder="https://github.com" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Username <span style="color:var(--muted);font-size:11px;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <div class="field-wrap">
+          <span class="field-icon">👤</span>
+          <input type="text" id="m-username" placeholder="johndoe" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Email <span style="color:var(--muted);font-size:11px;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <div class="field-wrap">
+          <span class="field-icon">✉</span>
+          <input type="email" id="m-email" placeholder="you@example.com" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Password <span style="color:var(--red);font-size:11px;">*</span></label>
+        <div class="field-wrap">
+          <span class="field-icon">🔒</span>
+          <input type="password" id="m-password" placeholder="Enter or generate a password"
+                 oninput="updateModalStrength(this.value)" />
+          <button class="pw-toggle" onclick="togglePw('m-password',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="gen-row">
+          <div class="strength-bar-wrap" style="flex:1;margin:0;">
+            <div class="strength-seg" id="mseg1"></div>
+            <div class="strength-seg" id="mseg2"></div>
+            <div class="strength-seg" id="mseg3"></div>
+            <div class="strength-seg" id="mseg4"></div>
+          </div>
+          <span id="m-str-lbl" style="font-size:11px;color:var(--muted);white-space:nowrap;min-width:36px;text-align:right;">—</span>
+          <button class="btn-gen" onclick="generatePassword()">⚡ Generate</button>
+        </div>
+      </div>
+      <div class="message" id="modal-msg" style="margin-top:0;margin-bottom:0;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="btn-save" onclick="handleSavePassword()">Save to Vault</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const BASE = 'http://127.0.0.1:8000';
+  let passwords = [];
+
+  /* ═══════════════════════════════════════════════
+     HELPERS
+  ═══════════════════════════════════════════════ */
+  const $    = id => document.getElementById(id);
+  const esc  = s  => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const escA = s  => String(s ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+  /*
+    normalise() — handles both tuple arrays and dicts from your SQLite backend.
+    Table column order: (id, user_id, site_link, username, email, encrypted_password, created_at)
+  */
+  function normalise(raw) {
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      return {
+        id:                 raw.id                 ?? raw[0] ?? null,
+        user_id:            raw.user_id            ?? raw[1] ?? '',
+        site_link:          raw.site_link          ?? raw[2] ?? '',
+        username:           raw.username           ?? raw[3] ?? '',
+        email:              raw.email              ?? raw[4] ?? '',
+        encrypted_password: raw.encrypted_password ?? raw.password ?? raw[5] ?? '',
+        created_at:         raw.created_at         ?? raw[6] ?? '',
+      };
+    }
+    if (Array.isArray(raw)) {
+      return { id:raw[0]??null, user_id:raw[1]??'', site_link:raw[2]??'',
+               username:raw[3]??'', email:raw[4]??'',
+               encrypted_password:raw[5]??'', created_at:raw[6]??'' };
+    }
+    return { id:null, user_id:'', site_link:'', username:'', email:'', encrypted_password:'', created_at:'' };
+  }
+
+  function showMsg(id, text, type='error') {
+    const el = $(id);
+    el.textContent = (type==='error' ? '✕  ' : '✓  ') + text;
+    el.className = `message ${type} show`;
+  }
+
+  function setBtn(id, loading, label) {
+    const b = $(id);
+    b.disabled = loading;
+    b.innerHTML = loading ? `<span class="spinner"></span>${label}…` : label;
+  }
+
+  function togglePw(inputId, btn) {
+    const inp = $(inputId), show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+  }
+
+  let toastTimer;
+  function toast(msg, type='success') {
+    const t = $('toast');
+    t.textContent = msg;
+    t.className = `show t-${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 2800);
+  }
+
+  function copyText(text, label) {
+    if (!text || text === '—') { toast(`No ${label} to copy`, 'error'); return; }
+    navigator.clipboard.writeText(text)
+      .then(()  => toast(`${label} copied ✓`))
+      .catch(()  => toast('Copy failed — check browser permissions', 'error'));
+  }
+
+  /* ═══════════════════════════════════════════════
+     PASSWORD STRENGTH
+  ═══════════════════════════════════════════════ */
+  function calcStrength(pw) {
+    let s = 0;
+    if (!pw) return s;
+    if (pw.length >= 8)           s++;
+    if (/[A-Z]/.test(pw))         s++;
+    if (/[0-9]/.test(pw))         s++;
+    if (/[^A-Za-z0-9]/.test(pw))  s++;
+    return s;
+  }
+  const SCOLS = ['','#ef4444','#f97316','#eab308','#34d399'];
+  const SLABS = ['—','Weak','Fair','Good','Strong'];
+
+  function updateStrength(pw) {
+    const s = calcStrength(pw);
+    for (let i=1;i<=4;i++) $(`seg${i}`).style.background = i<=s ? SCOLS[s] : 'var(--border)';
+    const lbl = $('strength-label');
+    lbl.textContent = pw ? SLABS[s] : 'Enter a password';
+    lbl.style.color  = pw ? SCOLS[s] : 'var(--muted)';
+  }
+
+  function updateModalStrength(pw) {
+    const s = calcStrength(pw);
+    for (let i=1;i<=4;i++) $(`mseg${i}`).style.background = i<=s ? SCOLS[s] : 'var(--border)';
+    const lbl = $('m-str-lbl');
+    lbl.textContent = pw ? SLABS[s] : '—';
+    lbl.style.color  = pw ? SCOLS[s] : 'var(--muted)';
+  }
+
+  function generatePassword() {
+    const u='ABCDEFGHIJKLMNOPQRSTUVWXYZ', l='abcdefghijklmnopqrstuvwxyz',
+          d='0123456789', sp='!@#$%^&*()_+-=';
+    let pw = u[~~(Math.random()*26)] + l[~~(Math.random()*26)]
+           + d[~~(Math.random()*10)] + sp[~~(Math.random()*sp.length)];
+    const all = u+l+d+sp;
+    for (let i=pw.length; i<20; i++) pw += all[~~(Math.random()*all.length)];
+    pw = pw.split('').sort(() => Math.random()-.5).join('');
+    $('m-password').value = pw;
+    $('m-password').type  = 'text';
+    updateModalStrength(pw);
+    toast('Strong password generated ⚡');
+  }
+
+  /* ═══════════════════════════════════════════════
+     AUTH
+  ═══════════════════════════════════════════════ */
+  function switchTab(tab) {
+    ['login','register'].forEach(k => {
+      $(`panel-${k}`).classList.toggle('hidden', k !== tab);
+      $(`tab-${k}`).classList.toggle('active',   k === tab);
+    });
+    document.querySelectorAll('.message').forEach(el => el.classList.remove('show'));
+  }
+
+  async function handleLogin() {
+    const email    = $('login-email').value.trim();
+    const password = $('login-password').value;
+    if (!email || !password) { showMsg('login-msg','Please fill in all fields.'); return; }
+    setBtn('btn-login', true, 'Sign In');
+    try {
+      const res  = await fetch(`${BASE}/auth/login`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) showMsg('login-msg', data.detail || 'Invalid credentials.');
+      else showDashboard(email);
+    } catch { showMsg('login-msg','Cannot reach server. Is your backend running?'); }
+    finally   { setBtn('btn-login', false, 'Sign In'); }
+  }
+
+  async function handleRegister() {
+    const email    = $('reg-email').value.trim();
+    const password = $('reg-password').value;
+    const confirm  = $('reg-confirm').value;
+    if (!email||!password||!confirm) { showMsg('register-msg','Please fill in all fields.'); return; }
+    if (password !== confirm)         { showMsg('register-msg','Passwords do not match.'); return; }
+    if (password.length < 8)          { showMsg('register-msg','Password must be at least 8 characters.'); return; }
+    setBtn('btn-register', true, 'Create Account');
+    try {
+      const res  = await fetch(`${BASE}/auth/register`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) showMsg('register-msg', data.detail || 'Registration failed.');
+      else {
+        showMsg('register-msg','Account created! You can now sign in.','success');
+        setTimeout(() => { $('login-email').value = email; switchTab('login'); }, 1300);
+      }
+    } catch { showMsg('register-msg','Cannot reach server. Is your backend running?'); }
+    finally   { setBtn('btn-register', false, 'Create Account'); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const a = document.querySelector('.form-panel:not(.hidden)');
+    if (a?.id === 'panel-login')    handleLogin();
+    if (a?.id === 'panel-register') handleRegister();
+  });
+
+  /* ═══════════════════════════════════════════════
+     DASHBOARD
+  ═══════════════════════════════════════════════ */
+  function showDashboard(email) {
+    $('auth-page').style.display = 'none';
+    $('dashboard-page').classList.add('visible');
+    const name = email.split('@')[0];
+    $('user-email-display').textContent = email;
+    $('user-avatar').textContent = name[0].toUpperCase();
+    $('welcome-msg').textContent = `Welcome back, ${name}! Your vault is encrypted and secure.`;
+    loadPasswords();
+  }
+
+  function handleLogout() {
+    passwords = [];
+    $('dashboard-page').classList.remove('visible');
+    $('dashboard-page').style.display = '';
+    $('auth-page').style.display = '';
+    $('login-email').value = '';
+    $('login-password').value = '';
+    $('search-input').value = '';
+    document.querySelectorAll('.message').forEach(el => el.classList.remove('show'));
+    switchTab('login');
+  }
+
+  /* ═══════════════════════════════════════════════
+     LOAD PASSWORDS
+     GET /password-manager/passwords
+  ═══════════════════════════════════════════════ */
+  async function loadPasswords() {
+    renderSkeletons();
+    try {
+      const res = await fetch(`${BASE}/password-manager/passwords`, { credentials:'include' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Server returned ${res.status}`);
+      }
+      const raw  = await res.json();
+      const list = Array.isArray(raw) ? raw : (raw.passwords ?? []);
+      passwords  = list.map(normalise);
+      renderList(passwords);
+      updateStats();
+    } catch (err) {
+      renderError(err.message || 'Could not load passwords.');
+    }
+  }
+
+  /* ═══════════════════════════════════════════════
+     SAVE PASSWORD
+     POST /password-manager/save-passwords
+  ═══════════════════════════════════════════════ */
+  async function handleSavePassword() {
+    const site_link = $('m-site').value.trim();
+    const username  = $('m-username').value.trim();
+    const email     = $('m-email').value.trim();
+    const password  = $('m-password').value;
+
+    if (!site_link)          { showMsg('modal-msg','Site / URL is required.'); return; }
+    if (!password)           { showMsg('modal-msg','Password is required.'); return; }
+    if (!username && !email) { showMsg('modal-msg','Enter at least a username or email.'); return; }
+
+    setBtn('btn-save', true, 'Save to Vault');
+    try {
+      const res  = await fetch(`${BASE}/password-manager/save-passwords`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ site_link, username, email, password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) showMsg('modal-msg', data.detail || 'Failed to save. Please try again.');
+      else { closeModal(); toast('Password saved to vault ✓', 'success'); await loadPasswords(); }
+    } catch { showMsg('modal-msg','Cannot reach server. Is your backend running?'); }
+    finally   { setBtn('btn-save', false, 'Save to Vault'); }
+  }
+
+  /* ═══════════════════════════════════════════════
+     DELETE PASSWORD
+     DELETE /password-manager/passwords/:id
+  ═══════════════════════════════════════════════ */
+  async function handleDelete(idx) {
+    const item = passwords[idx];
+    if (!confirm(`Remove "${item.site_link}" from your vault?`)) return;
+    passwords.splice(idx, 1);
+    renderList(passwords);
+    updateStats();
+    try {
+      if (item.id != null) {
+        const res = await fetch(`${BASE}/password-manager/passwords/${item.id}`, {
+          method:'DELETE', credentials:'include'
+        });
+        if (!res.ok) throw new Error();
+      }
+      toast('Entry removed from vault', 'success');
+    } catch {
+      toast('Delete failed — please refresh', 'error');
+      await loadPasswords();
+    }
+  }
+
+  /* ═══════════════════════════════════════════════
+     DECRYPT & REVEAL PASSWORD
+     POST /password-manager/decrypt-password
+     ─────────────────────────────────────────────
+     Sends the stored encrypted_password to the server.
+     Server runs decrypt_password(encrypted_password)
+     and returns { password: "plaintext" }.
+     The plaintext is ONLY held in memory for this reveal
+     and is never persisted to the passwords[] array.
+  ═══════════════════════════════════════════════ */
+
+  // Track reveal state per card: null = hidden, string = revealed plaintext
+  const revealCache = {};
+
+  async function toggleReveal(idx) {
+    console.log("CLICKED", idx);
+    const dotsEl   = $(`pwdots-${idx}`);
+    const plainEl  = $(`pwplain-${idx}`);
+    const revBtn   = $(`pwreveal-${idx}`);
+    const copyBtn  = $(`pwcopypw-${idx}`);
+    const isShown  = revBtn.dataset.shown === 'true';
+
+    if (isShown) {
+      /* ── Hide ── */
+      plainEl.style.display = 'none';
+      dotsEl.style.display  = 'block';
+      revBtn.textContent    = '👁';
+      revBtn.dataset.shown  = 'false';
+      revBtn.title          = 'Reveal password';
+      copyBtn.disabled      = true;
+      return;
+    }
+
+    /* ── Reveal: check cache first, then call server ── */
+    if (revealCache[idx] !== undefined) {
+      showPlaintext(idx, revealCache[idx]);
+      return;
+    }
+
+    const encryptedPw = passwords[idx]?.encrypted_password;
+    if (!encryptedPw) {
+      toast('No encrypted password stored for this entry', 'error');
+      return;
+    }
+
+    /* Show loading state */
+    revBtn.disabled      = true;
+    revBtn.innerHTML     = '<span class="spinner-sm"></span>';
+
+    try {
+      const res  = await fetch(`${BASE}/password-manager/decrypt-password`, {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ encrypted_password: encryptedPw })
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        toast(data.detail || 'Decryption failed', 'error');
+        revBtn.disabled     = false;
+        revBtn.textContent  = '👁';
+        return;
+      }
+
+      /* Cache so we don't call the server again on re-reveal */
+      revealCache[idx] = data.password;
+      showPlaintext(idx, data.password);
+
+    } catch {
+      toast('Cannot reach server', 'error');
+      revBtn.disabled    = false;
+      revBtn.textContent = '👁';
+    }
+  }
+
+  function showPlaintext(idx, plaintext) {
+    const dotsEl  = $(`pwdots-${idx}`);
+    const plainEl = $(`pwplain-${idx}`);
+    const revBtn  = $(`pwreveal-${idx}`);
+    const copyBtn = $(`pwcopypw-${idx}`);
+
+    plainEl.textContent  = plaintext;
+    plainEl.style.display = 'block';
+    dotsEl.style.display  = 'none';
+    revBtn.disabled       = false;
+    revBtn.textContent    = '🙈';
+    revBtn.dataset.shown  = 'true';
+    revBtn.title          = 'Hide password';
+    copyBtn.disabled      = false;
+    /* store plaintext on the copy button for easy access */
+    copyBtn.dataset.plain = plaintext;
+  }
+
+  function copyDecrypted(idx) {
+    const copyBtn = $(`pwcopypw-${idx}`);
+    const plain   = copyBtn?.dataset.plain || revealCache[idx] || '';
+    copyText(plain, 'Password');
+  }
+
+  /* ═══════════════════════════════════════════════
+     RENDER
+  ═══════════════════════════════════════════════ */
+  function renderSkeletons() {
+    $('pw-list').innerHTML = [1,2,3].map(() => `
+      <div class="skeleton-card">
+        <div class="skeleton" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton" style="height:14px;width:48%;"></div>
+          <div class="skeleton" style="height:12px;width:32%;"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderError(msg) {
+    $('pw-list').innerHTML = `
+      <div class="load-error">
+        <span class="load-error-icon">⚠️</span>
+        <span>${esc(msg)}</span>
+        <button onclick="loadPasswords()">Retry</button>
+      </div>`;
+  }
+
+  function initials(url) {
+    try {
+      const h = new URL(url.startsWith('http') ? url : 'https://' + url).hostname;
+      return h.replace('www.','').slice(0,2).toUpperCase();
+    } catch { return (url || '??').slice(0,2).toUpperCase(); }
+  }
+
+  function friendlyDate(dt) {
+    if (!dt) return '';
+    try { return new Date(dt).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }); }
+    catch { return dt; }
+  }
+
+  function strengthTag(pw) {
+    const s = calcStrength(pw);
+    if (!pw) return '<span class="pw-tag medium">Unknown</span>';
+    if (s >= 4) return '<span class="pw-tag strong">Strong</span>';
+    if (s >= 2) return '<span class="pw-tag medium">Fair</span>';
+    return '<span class="pw-tag weak">Weak</span>';
+  }
+
+  function renderList(list) {
+    // Clear reveal cache whenever the list is re-rendered
+    Object.keys(revealCache).forEach(k => delete revealCache[k]);
+
+    if (!list.length) {
+      $('pw-list').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🗄️</div>
+          <h3>Your vault is empty</h3>
+          <p>Save your first password to get started.</p>
+          <button class="btn-add-empty" onclick="openModal()">+ Add your first password</button>
+        </div>`;
+      return;
+    }
+
+    $('pw-list').innerHTML = list.map((item, idx) => {
+      const site  = item.site_link || '';
+      const uname = item.username  || '';
+      const email = item.email     || '';
+      const pw    = item.encrypted_password || '';
+      const date  = friendlyDate(item.created_at);
+
+      let badges = '';
+      if (uname) badges += `<span class="pw-badge"><span class="pw-badge-icon">👤</span>${esc(uname)}</span>`;
+      if (email) badges += `<span class="pw-badge"><span class="pw-badge-icon">✉</span>${esc(email)}</span>`;
+
+      return `
+        <div class="pw-card" id="pwcard-${idx}">
+          <div class="pw-favicon">${initials(site)}</div>
+
+          <div class="pw-info">
+            <div class="pw-site">
+              <a href="${esc(site.startsWith('http') ? site : 'https://'+site)}"
+                 target="_blank" rel="noopener"
+                 onclick="event.stopPropagation()">${esc(site)}</a>
+            </div>
+            <div class="pw-badges">${badges || `<span class="pw-badge">—</span>`}</div>
+          </div>
+
+          <div class="pw-tag-wrap">${strengthTag(pw)}</div>
+
+          <div class="pw-actions">
+            <button class="pw-btn" onclick="toggleExpand(${idx})">Details</button>
+            <button class="pw-btn" onclick="copyText('${escA(uname||email)}','Username')">Copy User</button>
+            <button class="pw-btn danger" onclick="handleDelete(${idx})">Delete</button>
+          </div>
+
+          <!-- ── Expanded detail panel ── -->
+          <div class="pw-detail" id="pwdetail-${idx}">
+
+            ${uname ? `
+            <div class="pw-detail-field">
+              <div class="pw-detail-label">Username</div>
+              <div class="pw-detail-value">
+                <span>${esc(uname)}</span>
+                <button class="copy-btn" onclick="copyText('${escA(uname)}','Username')">Copy</button>
+              </div>
+            </div>` : ''}
+
+            ${email ? `
+            <div class="pw-detail-field">
+              <div class="pw-detail-label">Email</div>
+              <div class="pw-detail-value">
+                <span>${esc(email)}</span>
+                <button class="copy-btn" onclick="copyText('${escA(email)}','Email')">Copy</button>
+              </div>
+            </div>` : ''}
+
+            <!-- Password reveal — decrypts via server on demand -->
+            <div class="pw-detail-field">
+              <div class="pw-detail-label">Password</div>
+              <div class="pw-detail-value">
+                <div class="pw-reveal-wrap">
+                  <span class="pw-dots"  id="pwdots-${idx}">••••••••••</span>
+                  <span class="pw-plain" id="pwplain-${idx}"></span>
+                  <button class="pw-reveal-btn"
+                          id="pwreveal-${idx}"
+                          data-shown="false"
+                          title="Reveal password"
+                          onclick="toggleReveal(${idx})">👁</button>
+                </div>
+                <button class="copy-btn"
+                        id="pwcopypw-${idx}"
+                        disabled
+                        onclick="copyDecrypted(${idx})">Copy</button>
+              </div>
+            </div>
+
+            ${date ? `
+            <div class="pw-detail-field">
+              <div class="pw-detail-label">Saved on</div>
+              <div class="pw-detail-value"><span>${esc(date)}</span></div>
+            </div>` : ''}
+
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleExpand(idx) {
+    const card   = $(`pwcard-${idx}`);
+    const isOpen = card.classList.contains('expanded');
+    document.querySelectorAll('.pw-card.expanded').forEach(c => c.classList.remove('expanded'));
+    if (!isOpen) card.classList.add('expanded');
+  }
+
+  function updateStats() {
+    $('stat-total').textContent = passwords.length;
+    const weak = passwords.filter(p => calcStrength(p.encrypted_password || '') < 2).length;
+    $('stat-weak').textContent = weak;
+    $('stat-weak-note').textContent = weak === 0
+      ? 'All passwords are strong'
+      : `${weak} password${weak > 1 ? 's' : ''} need attention`;
+    $('stat-weak-note').style.color = weak === 0 ? 'var(--green)' : 'var(--yellow)';
+  }
+
+  function filterPasswords(q) {
+    q = q.toLowerCase();
+    if (!q) { renderList(passwords); return; }
+    renderList(passwords.filter(p =>
+      (p.site_link||'').toLowerCase().includes(q) ||
+      (p.username||'').toLowerCase().includes(q)  ||
+      (p.email||'').toLowerCase().includes(q)
+    ));
+  }
+
+  /* ═══════════════════════════════════════════════
+     MODAL
+  ═══════════════════════════════════════════════ */
+  function openModal() {
+    ['m-site','m-username','m-email','m-password'].forEach(id => $(id).value = '');
+    $('m-password').type = 'password';
+    $('modal-msg').classList.remove('show');
+    for (let i=1;i<=4;i++) $(`mseg${i}`).style.background = 'var(--border)';
+    $('m-str-lbl').textContent = '—';
+    $('modal-backdrop').classList.add('open');
+    setTimeout(() => $('m-site').focus(), 80);
+  }
+
+  function closeModal() { $('modal-backdrop').classList.remove('open'); }
+  function backdropClose(e) { if (e.target === $('modal-backdrop')) closeModal(); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

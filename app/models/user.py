@@ -12,4 +12,6 @@ class InsertPassword(BaseModel):
     username:str
     email:str
     password:str
-    
+
+class DecryptRequest(BaseModel):
+    encrypted_password: str

@@ -1,8 +1,13 @@
 from fastapi import FastAPI
-from .routers import auth
-from app.database.db import create_table_users, create_table_passwords
-from app.database.db import create_table_passwords
+from fastapi.responses import HTMLResponse
+from pathlib import Path
+from app.routers import auth
+from app.routers import passwordmanager
 app = FastAPI()
-
-create_table_passwords()
+@app.get("/", response_class=HTMLResponse)
+def serve_index():
+    return Path("app/index.html").read_text(encoding="utf-8")
 app.include_router(auth.router)
+app.include_router(passwordmanager.router,prefix="/password-manager")
+
+

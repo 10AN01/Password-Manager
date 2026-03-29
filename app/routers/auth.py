@@ -40,7 +40,7 @@ def login(user:LoginAccount,response:Response,):
     expires = datetime.now(timezone.utc) + timedelta(minutes=15)
     user_id = db_user[0]
     payload = {
-    "sub": user_id,
+    "sub": str(user_id),
     "exp": expires
     }
     JWT_TOKEN = jwt.encode(
@@ -52,7 +52,8 @@ def login(user:LoginAccount,response:Response,):
     key="access_token",
     value=JWT_TOKEN,
     httponly=True,
-    secure=True,
-    samesite="Strict"
+    secure=False,
+    samesite="Lax",
+    path="/"
 )
     return {"message":"Successfully logged in!"}

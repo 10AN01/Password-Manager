@@ -3,6 +3,31 @@ import os
 from fastapi import HTTPException
 from app.database.connection import get_connection
 from app.models.user import LoginAccount
+
+# TESTING PURPOSE
+def drop_passwords_table():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DROP TABLE passwords CASCADE;")
+    print("Deleted table")
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+def print_passwords_data():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM passwords;")
+    rows = cursor.fetchall()
+
+    print("\n--- PASSWORDS TABLE DATA ---")
+    for row in rows:
+        print(row)
+
+    cursor.close()
+    conn.close()
 # MAIN AUTH TABLE
 
 def create_table_users():
@@ -29,15 +54,18 @@ def create_table_passwords():
                    CREATE TABLE IF NOT EXISTS passwords(
                        id UUID PRIMARY KEY,
                        user_id UUID REFERENCES users(id),
-                       site TEXT,
-                       email TEXT UNIQUE,
+                       site_link TEXT,
+                       username TEXT,
+                       email TEXT,
                        hashed_password TEXT,
                        date_entry TEXT
                    )
                    """)
+    print("created")
     conn.commit()
     cursor.close()
     conn.close()
+
 
 # REGISTER FUNCTIONS
 
@@ -52,14 +80,14 @@ def insert_account(id,email,hashed_password,created_at):
     conn.commit()
     cursor.close()
     conn.close()
-def insert_userpassword(id,user_id,site,email,hashed_password,data_entry):
+def insert_userpassword(password_id,user_id,site_link,email,hashed_password,date_entry):
     conn = get_connection()
     cursor = conn.cursor()
     
     cursor.execute("""
                    INSERT INTO passwords
                    VALUES (%s,%s,%s,%s,%s,%s)
-                   """,(id,user_id,site,email,hashed_password,data_entry))
+                   """,(password_id,user_id,site_link,email,hashed_password,date_entry))
     conn.commit()
     cursor.close()
     conn.close()
@@ -78,37 +106,27 @@ def account_check(email:str):
 
 # MAIN PASSWORD MANAGER
 
-
-def password_db():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-                   CREATE TABLE IF NOT EXISTS passwords(
-                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   user_id TEXT NOT NULL,
-                   site_link TEXT NOT NULL,
-                   username TEXT,
-                   email TEXT,
-                   encrypted_password TEXT NOT NULL,
-                   created_at TEXT
-                   )
-                   """)
-    print("Created Table")
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-def insert_data(user_id,site_link,username,email,password):
+def insert_data(password_id,user_id,site_link,username,email,password,date_entry):
     conn=get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-                   INSERT * INTO passwords(user_id,site_link,username,email,password)
-                   """,user_id,site_link,username,email,password)
+                   INSERT INTO passwords(id,user_id,site_link,username,email,hashed_password,date_entry)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s)
+                   """,(password_id,user_id,site_link,username,email,password,date_entry))
     conn.commit()
     cursor.close()
     conn.close()
 
-def account_check(user_id):
+def account_check(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   SELECT * FROM users WHERE email = %s
+                   """,(email,))
+    user = cursor.fetchone()
+    return user
+
+def account_check_id(user_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -116,3 +134,25 @@ def account_check(user_id):
                    """,(user_id,))
     user = cursor.fetchone()
     return user
+
+def get_passwords_by_user(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT * FROM passwords WHERE user_id = %s
+        """, (user_id,))
+        results = cursor.fetchall()
+        return results
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_password_records(user_id):
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT * FROM passwords WHERE user_id = %s
+            """, (user_id,))
+            return cursor.fetchall()
